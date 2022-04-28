@@ -1,2 +1,2 @@
 # ugarit
-Universal Geoetric Algebra library fpr C++
+Universal Geoetric Algebra library for C++.
