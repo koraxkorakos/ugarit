@@ -1,5 +1,10 @@
-project(ugarit_project LANGUAGES CXX)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13..3.20.5)
+project(ugarit_project
+        VERSION 0.0.0.0
+        DESCRIPTION "Universal Geometric Algebra Library for C++"
+        HOMEPAGE_URL https://github.com/koraxkorakos/ugarit
+        LANGUAGES CXX)
+
 
 set(CMAKE_CXX_STANDARD 20)
 # not fully supported by our cmake
