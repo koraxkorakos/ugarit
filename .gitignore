@@ -32,3 +32,6 @@
 *.app
 
 build/**
+.vscode/launch.json
+.vscode/settings.json
+.vscode/settings.json
