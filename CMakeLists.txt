@@ -1,12 +1,15 @@
-cmake_minimum_required(VERSION 3.7.0...3.28.99)
+cmake_minimum_required(VERSION 3.28.0...3.28.99)
 project(ugarit_project
         VERSION 0.0.0.1
         DESCRIPTION "Universal Geometric Algebra Library for C++"
         HOMEPAGE_URL https://github.com/koraxkorakos/ugarit
         LANGUAGES CXX)
+        
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "2182bf5c-ef0d-91da-49dbc3090d2a")
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS Off)
 
-
-set(CMAKE_CXX_STANDARD 20)
 # not fully supported by our cmake
 
 #find_package(Boost, REQUIRED program_options system filesystem exception)
@@ -55,8 +58,13 @@ endif()
 
 add_library(ugarit)
 
+target_compile_options(ugarit
+    PUBLIC
+    "-fmodules-ts")
+
 target_sources(ugarit
-               PRIVATE
+               PUBLIC
+               FILE_SET ugarit TYPE CXX_MODULES FILES
                src/ugarit.cpp)
 
 target_include_directories(ugarit
@@ -65,10 +73,6 @@ target_include_directories(ugarit
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                            PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/src)
-               
-set_property(TARGET ugarit
-             PROPERTY PUBLIC_HEADER
-             include/ugarit/ugarit.hpp)                           
 
 target_link_libraries(ugarit
                       PUBLIC)
