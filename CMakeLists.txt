@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.13..3.20.5)
+cmake_minimum_required(VERSION 3.7.0...3.28.99)
 project(ugarit_project
-        VERSION 0.0.0.0
+        VERSION 0.0.0.1
         DESCRIPTION "Universal Geometric Algebra Library for C++"
         HOMEPAGE_URL https://github.com/koraxkorakos/ugarit
         LANGUAGES CXX)
@@ -11,6 +11,18 @@ set(CMAKE_CXX_STANDARD 20)
 
 #find_package(Boost, REQUIRED program_options system filesystem exception)
 #find_package(Eigen3 REQUIRED NO_MODULE)
+
+include(ExternalProject)
+ExternalProject_Add(googletest
+    GIT_REPOSITORY    https://github.com/google/googletest.git
+    GIT_TAG           main
+    SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
+    BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND     ""
+    INSTALL_COMMAND   ""
+    TEST_COMMAND      ""
+)
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -37,8 +49,9 @@ add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
 if(CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include"
                         "${gmock_SOURCE_DIR}/include"
-    )
+)
 endif()
+
 
 add_library(ugarit)
 
