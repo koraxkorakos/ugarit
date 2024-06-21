@@ -6,6 +6,7 @@ target_sources(ugarit_tests
                PRIVATE  
                test_ugarit.cpp)
 
+#target_link_libraries(ugarit_tests ugarit GTest::Main testutils)
 target_link_libraries(ugarit_tests ugarit GTest::Main testutils)
 
 gtest_discover_tests(ugarit_tests)

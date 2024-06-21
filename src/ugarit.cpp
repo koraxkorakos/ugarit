@@ -1,7 +1,9 @@
 module;
+
+//Note, we use header includes, because import of std and std:compact are not yet supported on GCC
+//export import std;
 #include <concepts>
 #include <cstdint>
-#include <type_traits>
 
 export module ugarit;
 

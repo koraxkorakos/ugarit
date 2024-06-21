@@ -1,16 +1,18 @@
-cmake_minimum_required(VERSION 3.28.0...3.28.99)
+cmake_minimum_required(VERSION 3.30...3.31)
+#cmake_minimum_required(VERSION 3.29.20240416 FATAL_ERROR)
 project(ugarit_project
         VERSION 0.0.0.1
         DESCRIPTION "Universal Geometric Algebra Library for C++"
         HOMEPAGE_URL https://github.com/koraxkorakos/ugarit
         LANGUAGES CXX)
-        
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "2182bf5c-ef0d-91da-49dbc3090d2a")
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
-set(CMAKE_CXX_STANDARD 23)
+     
+set(CMAKE_CXX_MODULE_STD On)        
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP On)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS Off)
 
-# not fully supported by our cmake
+set(CXX_SCAN_FOR_MODULES On)
 
 #find_package(Boost, REQUIRED program_options system filesystem exception)
 #find_package(Eigen3 REQUIRED NO_MODULE)
@@ -56,31 +58,34 @@ if(CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 
-add_library(ugarit)
+add_library(ugarit STATIC)
+
+target_compile_features(ugarit
+    PRIVATE   cxx_std_20
+    INTERFACE cxx_std_20
+)
 
 target_compile_options(ugarit
     PUBLIC
-    "-fmodules-ts")
+     $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>
+)
 
 target_sources(ugarit
                PUBLIC
                FILE_SET ugarit TYPE CXX_MODULES FILES
                src/ugarit.cpp)
 
-target_include_directories(ugarit
-                           PUBLIC 
-                           $<INSTALL_INTERFACE:include>    
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                           PRIVATE
-                           ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
 target_link_libraries(ugarit
-                      PUBLIC)
+                      PRIVATE)
 
-install(TARGETS ugarit
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+# Make an executable.
+add_executable(main)
+# Note that this source is *not* allowed to `import std` as it ends up
+# with only C++20 support due to the `uses_std` INTERFACE requirements.
+target_sources(main
+  PRIVATE src/main.cpp)
+target_link_libraries(main PRIVATE ugarit)
+
 
 option(BUILD_TESTS "Build unit tests" On)        
 if(${BUILD_TESTS})
