@@ -1,18 +1,25 @@
 cmake_minimum_required(VERSION 3.30...3.31)
-#cmake_minimum_required(VERSION 3.29.20240416 FATAL_ERROR)
 project(ugarit_project
         VERSION 0.0.0.1
         DESCRIPTION "Universal Geometric Algebra Library for C++"
         HOMEPAGE_URL https://github.com/koraxkorakos/ugarit
         LANGUAGES CXX)
-     
-set(CMAKE_CXX_MODULE_STD On)        
-set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP On)
-set(CMAKE_CXX_STANDARD 20)
+
+set(CMAKE_CXX_STANDARD 20)     
 set(CMAKE_CXX_EXTENSIONS Off)
 
-set(CXX_SCAN_FOR_MODULES On)
+option(UGARIT_IMPORT_STD_MODULE "Enable import std" Off)
+
+if (UGARIT_IMPORT_STD_MODULE)
+   set(CMAKE_CXX_STANDARD 23)   
+   set(CMAKE_CXX_MODULE_STD On)   
+endif()
+
+set(CXX_SCAN_FOR_MODULES On)    
+
+# The following "import std" C++23 features is not implemented in most recent GCC and CLANG
+#set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+#set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP On)
 
 #find_package(Boost, REQUIRED program_options system filesystem exception)
 #find_package(Eigen3 REQUIRED NO_MODULE)
