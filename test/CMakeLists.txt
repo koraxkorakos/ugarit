@@ -4,7 +4,8 @@ add_executable(ugarit_tests)
 
 target_sources(ugarit_tests 
                PRIVATE  
-               test_ugarit.cpp)
+               test_ugarit.cpp
+               test_meta.cpp)
 
 #target_link_libraries(ugarit_tests ugarit GTest::Main testutils)
 target_link_libraries(ugarit_tests ugarit GTest::Main testutils)

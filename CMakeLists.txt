@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.30...3.31)
+cmake_policy(SET CMP0048 NEW) 
+cmake_minimum_required(VERSION 3.30...3.30)
 project(ugarit_project
         VERSION 0.0.0.1
         DESCRIPTION "Universal Geometric Algebra Library for C++"

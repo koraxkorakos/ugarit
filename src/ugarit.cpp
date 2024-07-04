@@ -4,6 +4,7 @@ module;
 //export import std;
 #include <concepts>
 #include <cstdint>
+#include "../include/ugarit/meta.hpp"
 
 export module ugarit;
 

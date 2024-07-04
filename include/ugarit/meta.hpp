@@ -13,9 +13,10 @@ namespace ugarit {
 
     template <typename T, typename... TS>
     concept HigherOrderMetaFunction = requires {
-        typename T::template f<TS...>;
+        typename T::template f<TS...>;        
     };
 
+#if 0
     template <typename T> 
     concept Continuation = HigherOrderMetaFunction<T>;
 
@@ -62,7 +63,5 @@ namespace ugarit {
     struct find {
         template <typename... TS> using f = C::template f<TF::template f<TS>...>;      
     };
-
-
-
+#endif
 }
