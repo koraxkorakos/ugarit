@@ -24,6 +24,7 @@ set(CXX_SCAN_FOR_MODULES On)
 #find_package(Boost, REQUIRED program_options system filesystem exception)
 #find_package(Eigen3 REQUIRED NO_MODULE)
 
+include(CTest) 
 include(ExternalProject)
 ExternalProject_Add(googletest
     GIT_REPOSITORY    https://github.com/google/googletest.git
@@ -64,12 +65,17 @@ if(CMAKE_VERSION VERSION_LESS 2.8.11)
 )
 endif()
 
-
 add_library(ugarit STATIC)
 
 target_compile_features(ugarit
-    PRIVATE   cxx_std_20
+    PRIVATE   cxx_std_23
     INTERFACE cxx_std_20
+)
+
+target_include_directories(ugarit
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>  
 )
 
 target_compile_options(ugarit
@@ -85,35 +91,9 @@ target_sources(ugarit
 target_link_libraries(ugarit
                       PRIVATE)
 
-# Make an executable.
-add_executable(main)
-# Note that this source is *not* allowed to `import std` as it ends up
-# with only C++20 support due to the `uses_std` INTERFACE requirements.
-target_sources(main
-  PRIVATE src/main.cpp)
-target_link_libraries(main PRIVATE ugarit)
-
-
+# unit testing
 option(BUILD_TESTS "Build unit tests" On)        
 if(${BUILD_TESTS})
   enable_testing()
-
-  add_library(testutils)
-
-  target_sources(testutils
-                 PRIVATE
-                 src/demangle.cpp)
-
-  target_include_directories(testutils
-                             PUBLIC 
-                             $<INSTALL_INTERFACE:include>    
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                             PRIVATE
-                             ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-   set_property(TARGET testutils 
-                PROPERTY PUBLIC_HEADER
-                include/testutils/demangle.hpp)
-
-   add_subdirectory("test")
+  add_subdirectory("test")
 endif()
