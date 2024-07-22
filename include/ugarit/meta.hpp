@@ -4,18 +4,81 @@
 
 namespace ugarit {
 
+    using N = std::intmax_t;
+
+
+    template <MetaFunction F, typename C = Listify>
+    struct Find {
+        template <typename... TS> using f 
+            = typename Select<sizeof...(TS)>::template f<
+                C::template f<>>,
+                C::template f<>>,
+    };
+
+    template <unsigned n, typename C> struct FindHelper;
+    template <> struct FindHelper<0>{ template <typename... TS> using f = Apply<C>::typename template f<>; }
+    template <> struct FindHelper<1>{ 
+        template <typename T, typename... TS> 
+        using f = Apply<C>::typename template f<>; }
+    };
+
+    class std::conditional<sizeof...(TS), F0, FN>::template f<>
+
+#if 0
     // concepts
 
-    template <typename T>
-    concept MetaFunction = requires {
-        typename T::type;
-    };
+
+    constexpr bool is_strictly_sorted()
+    {
+        return true;
+    }
+
+    constexpr bool is_strictly_sorted(N)
+    {
+        return true;
+    }
+
+    constexpr bool is_strictly_sorted(N n1, N n2)
+    {
+        return n1 < n2;
+    }
+
+    constexpr bool is_strictly_sorted(N n1, N n2, N ns...)
+    {
+        return n1 < n2 && is_strictly_sorted(n2, ns);
+    }
+  
+  /*
+    template <N... ns>  
+    struct bits;
+
+    template <N... ns> requires { is_strictly_sorted(ns...) }
+    struct bits<ns...>{};
+
+    template <N... ns> requires { !is_strictly_sorted(ns...) }
+    struct bits<ns...>;*/
+
+    template <N n>  
+    struct bits_;
+
+    template <N n> requires 
+    { 
+        std::is_same_t<
+            std::integral_constant<N, n>,
+            std::integral_constant<N, (n / 2) * 2>
+        > 
+    }
+    struct bits_<ns...>{};
+
+    template <N n> requires { n % 2 = 1 }
+    struct bits_<ns...>;
 
     template <typename T, typename... TS>
-    concept HigherOrderMetaFunction = requires {
+    concept HigherOrderMetaFunction = requires(T) {
         typename T::template f<TS...>;
     };
-#if 0 
+
+
     template <typename T> 
     concept Continuation = HigherOrderMetaFunction<T>;
 
