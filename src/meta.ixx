@@ -1,4 +1,4 @@
-export module ugarit;
+export module ugarit:meta;
 
 #include <concepts>
 #include <type_traits>

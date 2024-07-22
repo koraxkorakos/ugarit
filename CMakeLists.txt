@@ -1,36 +1,36 @@
 cmake_minimum_required(VERSION 3.30...3.30.20240621-gb83fabd)
+if (UGARIT_IMPORT_STD_MODULE)
+    # Set experimental flag to enable `import std` support from CMake.
+    # This must be enabled before C++ language support.
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
+    # This specific value changes as experimental support evolves. See
+    # `Help/dev/experimental.rst` in the CMake source corresponding to
+    # your CMake build for the exact value to use.
+    "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP On)  
+  set(CMAKE_CXX_MODULE_STD On)
+endif()
+
 project(ugarit_project
         VERSION 0.0.0.1
         DESCRIPTION "Universal Geometric Algebra Library for C++"
         HOMEPAGE_URL https://github.com/koraxkorakos/ugarit
         LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)     
+set(CMAKE_CXX_STANDARD 23)     
+set(CMAKE_CXX_STANDARD_REQUIRED On)
 set(CMAKE_CXX_EXTENSIONS Off)
-
-option(UGARIT_IMPORT_STD_MODULE "Enable import std" Off)
-option(ugarit_DOCTESTS "Build doctest unit tests" ON)
-option(UGARIT_GTESTS "Build googletest unit tests" ON)
-option(UGARIT_DOXYDOC "Build source documentation" Off)
-
-if (UGARIT_IMPORT_STD_MODULE)
-   set(CMAKE_CXX_STANDARD 23)   
-   set(CMAKE_CXX_MODULE_STD On)   
-else()
-    set(CMAKE_CXX_STANDARD 20)
-endif()
-set(CMAKE_CXX_EXTENSIONS Off)
-set(CXX_SCAN_FOR_MODULES On)    
 set(CMAKE_CXX_SCAN_FOR_MODULES On)
-
-# The following "import std" C++23 features is not implemented in most recent GCC and CLANG
-#set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
-#set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP On)
+# -----------------------------------------------------------------------------
+option(UGARIT_IMPORT_STD_MODULE "Enable import std" Off)
+option(ugarit_DOCTESTS "Build doctest unit tests" On)
+option(UGARIT_GTESTS "Build googletest unit tests" On)
+option(UGARIT_DOXYDOC "Build source documentation" Off)
 
 #find_package(Boost, REQUIRED program_options system filesystem exception)
 #find_package(Eigen3 REQUIRED NO_MODULE)
 
-if(${ugarit_DOCTESTS})
+if(${UGARIT_DOCTESTS})
     set (UGARIT_UNITTESTS On)
 elseif(${ugarit_GTESTS})
     set (UGARIT_UNITTESTS On)
@@ -62,24 +62,17 @@ if(${UGARIT_DOCTESTS})
 endif()
 
 # -----------------------------------------------------------------------------
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 add_library(ugarit STATIC)
 target_sources(ugarit
                PUBLIC 
-               FILE_SET ugarit_modules TYPE CXX_MODULES FILES
-               src/ugarit.cpp)
+               FILE_SET ugarit_modules TYPE CXX_MODULES               
+               FILES src/meta.ixx src/ugarit.ixx src/core.ixx)
            
 target_compile_options(ugarit
                PUBLIC
                $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>
-)
-
-target_include_directories(ugarit
-                           PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                           $<INSTALL_INTERFACE:include>
 )
 
 target_link_libraries(ugarit
@@ -95,12 +88,13 @@ if (${UGARIT_UNITTESTS})
     add_subdirectory(test)
 endif()
 
+# -----------------------------------------------------------------------------
 if(${UGARIT_DOXYDOC})
     find_package(Doxygen
                  REQUIRED dot
                  OPTIONAL_COMPONENTS mscgen dia)
 
-    doxygen_add_docs(ugarit)
+    doxygen_add_docs(ugaritdox)
 endif()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
