@@ -6,7 +6,7 @@ project(ugarit_project
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)     
-
+set(CMAKE_CXX_EXTENSIONS Off)
 
 option(UGARIT_IMPORT_STD_MODULE "Enable import std" Off)
 option(ugarit_DOCTESTS "Build doctest unit tests" ON)
