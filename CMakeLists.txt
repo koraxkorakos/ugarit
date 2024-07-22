@@ -26,6 +26,7 @@ option(UGARIT_IMPORT_STD_MODULE "Enable import std" Off)
 option(ugarit_DOCTESTS "Build doctest unit tests" On)
 option(UGARIT_GTESTS "Build googletest unit tests" On)
 option(UGARIT_DOXYDOC "Build source documentation" Off)
+option(UGARIT_BUILD_THE_MANUAL "Build the manual" On)
 
 #find_package(Boost, REQUIRED program_options system filesystem exception)
 #find_package(Eigen3 REQUIRED NO_MODULE)
@@ -98,7 +99,6 @@ if(${UGARIT_DOXYDOC})
 endif()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# LATEX BUILD TO BE DONE YET!
-#if (CBS_BUILD_THE_MANUAL)
-#    find_package(COMPONENTS PDFLATEX BIBER MAKEINDEX)
-#endif()
+if (UGARIT_BUILD_THE_MANUAL)
+    add_subdirectory(doc)
+endif()

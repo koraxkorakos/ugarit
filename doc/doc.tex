@@ -2,14 +2,22 @@
 \usepackage{amsmath}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{csquotes}
+\usepackage{makeidx}
+\usepackage{showidx}
+\makeindex
 \usepackage[backend=biber]{biblatex}
-\addbibresource{doc.bib}
+\addbibresource{../../doc/doc.bib}
 
 \title{CBS Manual}
 \author{Christian Kotz}
 \date{\today}
 
 \begin{document}
+
+\index{Cpp}
+
+\autocite{ISO/IEC2020}
 
 \printbibliography
 
