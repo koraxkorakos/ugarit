@@ -2,6 +2,13 @@
 #include <concepts>
 #include <cstdint>
 
+
+/// HOMF = Higher Ordr Metafunction
+///
+/// A type with a nested template <TLIST....> using f = ...;
+///
+/// TLIST can be a list of n to m, 0 <= n <= m, type or value parameters, a type pack allowed at the end
+
 namespace ugarit {
 
     namespace meta {
@@ -13,34 +20,51 @@ namespace ugarit {
             typename T::type;
         };
 
-        template <N n>
-        struct Select  {
-            template <typename T, typename... TS> using f = typename Select<n-1>::template f<TS...>;
-        };
+        template <typename...> struct List{ using type = List; }; ///< Metafunction List constructor
 
-        template <>
-        struct Select<N{}>  {
-            template <typename T, typename...> using f = T;
-        };
+        struct Error; ///< meta programming result in case of error, e.g. pop_front on an empty list
+                      ///< 
+                      ///< Intentionally left undefined.
+        
+        
+        struct Fail{ template <typename...> using f = Error; }; ///<f HOMF which yields error upon invocation
 
-        template <bool b> using If = Select<!b>;
+        template <bool cond> struct If; ///< HOMF to switch between two type parameters
+        template <> struct If<true>   { template <typename T, typename> using f = T;  };   
+        template <> struct If<false>  { template <typename, typename T> using f = T;  };      
+        template <bool cond, typename T, typename F> using Ifc = typename If<cond>::template f<T,F>;
 
-        template <typename...> struct list;
+        struct Head {  template <typename T, typename...> using f = T;  };///< HOMF extract the first of a parameter list of type parameters
 
-        struct Listify
+        template <N n> struct At; ///< HOMF to extract nth element of a parameter list of type parameters
+        template <N n> struct At
         {
-            template<typename...TS> using f = list<TS...>;
-        }; //TODO
-
-        template <N n, typename C = Listify>
-        struct PopFront  {
-            template <typename T, typename... TS> using f = typename PopFront<n-1>::template f<TS...>;
+            template <typename, typename... TS> 
+            using f = Ifc<(sizeof...(TS) > 0), At<N{n}-N{1}>, Fail>::template f<TS...>;
         };
 
-        template <typename C>
-        struct PopFront<N{}, C>  {
-            template <typename... TS> using f = typename C::template f<TS...>;
+        template <> struct At<N{}> : Head{}; 
+        
+
+        struct Listify { template <typename... TS > using f = List<TS...>;  }; ///< HOMF to store type parameters in a list
+
+        template <typename C = Listify> struct Call 
+        {
+            template <typename... TS > using f = typename C::template f<TS...>;
         };
+
+        template <N n, typename C = Listify> struct PopFront ///< HOMF returnning list with first n template parameters dropped
+        {
+            template <typename, typename... TS> using f = typename Ifc<(sizeof...(TS) > 0), 
+                                                                       PopFront<n-N{1},C>,
+                                                                       C>::template f<TS...>; 
+        };
+
+        template <typename C> struct PopFront<N{},C> : C{};
+
+
+        template <typename Less, typename C = Listify>  struct Unique; ///< \todo
+
     }
 #if 0
     template<N n, typename C = Listify> 
@@ -85,26 +109,7 @@ namespace ugarit {
     class std::conditional<sizeof...(TS), F0, FN>::template f<>
 
 
-    constexpr bool is_strictly_sorted()
-    {
-        return true;
-    }
 
-    constexpr bool is_strictly_sorted(N)
-    {
-        return true;
-    }
-
-    constexpr bool is_strictly_sorted(N n1, N n2)
-    {
-        return n1 < n2;
-    }
-
-    constexpr bool is_strictly_sorted(N n1, N n2, N ns...)
-    {
-        return n1 < n2 && is_strictly_sorted(n2, ns);
-    }
-  
   /*
     template <N... ns>  
     struct bits;
