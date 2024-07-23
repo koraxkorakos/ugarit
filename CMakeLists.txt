@@ -23,7 +23,7 @@ set(CMAKE_CXX_EXTENSIONS Off)
 set(CMAKE_CXX_SCAN_FOR_MODULES On)
 # -----------------------------------------------------------------------------
 option(UGARIT_IMPORT_STD_MODULE "Enable import std" Off)
-option(ugarit_DOCTESTS "Build doctest unit tests" On)
+option(UGARIT_DOCTESTS "Build doctest unit tests" On)
 option(UGARIT_GTESTS "Build googletest unit tests" On)
 option(UGARIT_DOXYDOC "Build source documentation" Off)
 option(UGARIT_BUILD_THE_MANUAL "Build the manual" On)
@@ -74,6 +74,11 @@ target_sources(ugarit
 target_compile_options(ugarit
                PUBLIC
                $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>
+)
+
+target_include_directories(ugarit
+                           PUBLIC
+                           include
 )
 
 target_link_libraries(ugarit

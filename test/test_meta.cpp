@@ -1,6 +1,5 @@
-#include "../include/ugarit/meta.hpp"
-
 #include <gtest/gtest.h>
+#include "../include/ugarit/meta.hpp"
 
 namespace
 {
