@@ -4,6 +4,8 @@ export module ugarit:meta;
 #include <type_traits>
 #include <cstdint>
 
+#include <ugarit/meta.hpp>
+
 export{
     namespace ugarit {
         using bits = std::uintmax_t;
@@ -19,6 +21,8 @@ export{
         template <typename T> struct bb;
 
         template <Arithmetic T> struct bb<T> : std::integral_constant<bits, bits{}>{};
+
+
     }
 
 }

@@ -4,8 +4,68 @@
 
 namespace ugarit {
 
-    using N = std::intmax_t;
+    namespace meta {
 
+        using N = std::uintmax_t;
+
+        template <typename T>
+        concept MetaFunction = requires {
+            typename T::type;
+        };
+
+        template <N n>
+        struct Select  {
+            template <typename T, typename... TS> using f = typename Select<n-1>::template f<TS...>;
+        };
+
+        template <>
+        struct Select<N{}>  {
+            template <typename T, typename...> using f = T;
+        };
+
+        template <bool b> using If = Select<!b>;
+
+        template <typename...> struct list;
+
+        struct Listify
+        {
+            template<typename...TS> using f = list<TS...>;
+        }; //TODO
+
+        template <N n, typename C = Listify>
+        struct PopFront  {
+            template <typename T, typename... TS> using f = typename PopFront<n-1>::template f<TS...>;
+        };
+
+        template <typename C>
+        struct PopFront<N{}, C>  {
+            template <typename... TS> using f = typename C::template f<TS...>;
+        };
+    }
+#if 0
+    template<N n, typename C = Listify> 
+    struct For{
+        template <typename F, typename... TS> using f = For<n-1, C>::template apply<TS...>;
+    }
+
+
+    template <N n, typename C = Listify>
+    struct Rotate
+    {
+        template <typename T, typename... TS> using f = Rotate<n-1, C>::template f<TS..., T>;
+    };
+
+    template <typename C>
+    struct Rotate<N{}, C>
+    {
+        template <typename... TS> using f = C::template f<TS...>;
+    };
+
+    template <typename C>
+    struct Reverse  {
+    template <typename T, typename... TS> using f = Reverse<C>::template apply<TS..., T>;
+
+    // concepts
 
     template <MetaFunction F, typename C = Listify>
     struct Find {
@@ -23,9 +83,6 @@ namespace ugarit {
     };
 
     class std::conditional<sizeof...(TS), F0, FN>::template f<>
-
-#if 0
-    // concepts
 
 
     constexpr bool is_strictly_sorted()

@@ -89,9 +89,10 @@ target_link_libraries(ugarit
 add_executable(ugarit_main src/main.cpp)
 target_link_libraries(ugarit_main  ugarit)              
 
-if (${UGARIT_UNITTESTS})
+if (${UGARIT_UNITTESTS})     
     enable_testing()
     add_subdirectory(test)
+    message("Building unit tests")
 endif()
 
 # -----------------------------------------------------------------------------

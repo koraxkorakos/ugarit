@@ -1,11 +1,15 @@
 add_subdirectory(testutils)
 
-if(${CSB_GTESTS})
+if(${UGARIT_GTESTS})
     FetchContent_MakeAvailable(googletest)
+    add_subdirectory(gtest)
+    message("building doctests")
 endif()
 
-if(${CSB_DOCTESTS})
+if(${UGARIT_DOCTESTS})
     FetchContent_MakeAvailable(doctest)
+    add_subdirectory(doctest)
+    message("building google tests")
 endif()
 
 set_tests_properties(${noArgsTests}   PROPERTIES TIMEOUT 20)
