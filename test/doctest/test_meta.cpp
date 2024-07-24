@@ -36,18 +36,39 @@ TEST_CASE("test meta::Return")
 }
 
 
-TEST_CASE("test meta::If")
-{
-    namespace meta = ugarit::meta;
-}
-
 TEST_CASE("test meta::Ifc")
 {
     namespace meta = ugarit::meta;
 
-    CHECK((std::is_same_v<meta::Ifc<true, int, long>, int>));
-    CHECK((std::is_same_v<meta::Ifc<false, int, long>, long>));
+    CHECK((std::is_same_v<meta::Ifc<true>::template f<int, long>, int>));
+    CHECK((std::is_same_v<meta::Ifc<false>::template f<int, long>, long>));
 }
+
+TEST_CASE("test meta::Alternativec")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::Alternativec<true, int, long>, int>));
+    CHECK((std::is_same_v<meta::Alternativec<false,int, long>, long>));
+}
+
+
+TEST_CASE("test meta::If")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::If<meta::True>::f<int, long>, meta::Ifc<true>::f<int, long>>));
+    CHECK((std::is_same_v<meta::If<meta::False>::f<int, long>, meta::Ifc<false>::f<int, long>>));
+}
+
+TEST_CASE("test meta::Alternative")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::Alternative<meta::True,int, long>, int>));
+    CHECK((std::is_same_v<meta::Alternative<meta::False,int, long>, long>));
+}
+
 
 TEST_CASE("test meta::Fail")
 {
@@ -58,15 +79,32 @@ TEST_CASE("test meta::Fail")
     CHECK((std::is_same_v<meta::Fail::f<long, int>, meta::Error>));
 }
 
-TEST_CASE("test meta::At")
+TEST_CASE("test meta::Atc")
 {
     namespace meta = ugarit::meta;
 
-    CHECK((std::is_same_v<meta::At<0>::f<int>, int>));
-    CHECK((std::is_same_v<meta::At<0>::f<int, long>, int>));
-    CHECK((std::is_same_v<meta::At<1>::f<int, long>, long>));
-    CHECK((std::is_same_v<meta::At<2>::f<int, long, bool>, bool>));
+    CHECK((std::is_same_v<meta::Atc<0>::f<int>, int>));
+    CHECK((std::is_same_v<meta::Atc<0>::f<int, long>, int>));
+    CHECK((std::is_same_v<meta::Atc<1>::f<int, long>, long>));
+    CHECK((std::is_same_v<meta::Atc<2>::f<int, long, bool>, bool>));
 }
+
+namespace 
+{
+    template <unsigned n> using UC = std::integral_constant<unsigned, n>;
+    template <long n> using LC = std::integral_constant<long, n>;
+}
+
+TEST_CASE("test meta::Atc")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::At<UC<0>>::f<int>, int>));
+    CHECK((std::is_same_v<meta::At<LC<0>>::f<int>, int>));
+    CHECK((std::is_same_v<meta::At<UC<1>>::f<int, long>, long>));
+    CHECK((std::is_same_v<meta::At<LC<2>>::f<int, long, bool>, bool>));
+}
+
 
 TEST_CASE("test meta::List")
 {
@@ -84,10 +122,9 @@ TEST_CASE("test meta::Listify")
 {
     namespace meta = ugarit::meta;
 
-    CHECK((std::is_same_v<meta::At<0>::f<int>, int>));
-    CHECK((std::is_same_v<meta::At<0>::f<int, long>, int>));
-    CHECK((std::is_same_v<meta::At<1>::f<int, long>, long>));
-    CHECK((std::is_same_v<meta::At<2>::f<int, long, bool>, bool>));
+    CHECK((std::is_same_v<meta::Listify::f<>, meta::List<>>));
+    CHECK((std::is_same_v<meta::Listify::f<int>, meta::List<int>>));
+    CHECK((std::is_same_v<meta::Listify::f<int, long>, meta::List<int, long>>));
 }
 
 
@@ -132,7 +169,7 @@ TEST_CASE("test meta::PushFront")
     namespace meta = ugarit::meta;
 
     CHECK((std::is_same_v<meta::PushFront<>, meta::Listify>));
-    CHECK((std::is_same_v<meta::PushFront<Wrap>, WrapList<>>));
+    CHECK((std::is_same_v<meta::PushFront<Wrap>, Wrap>));
 }
 
 

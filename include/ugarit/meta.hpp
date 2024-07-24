@@ -1,6 +1,7 @@
 #pragma once
 #include <concepts>
 #include <cstdint>
+#include <type_traits>
 
 
 /// HOMF = Higher Ordr Metafunction
@@ -13,12 +14,24 @@ namespace ugarit {
 
     namespace meta {
 
-        using N = std::uintmax_t;
+        using N = std::uintmax_t;        
 
         template <typename T>
         concept MetaFunction = requires {
             typename T::type;
         };
+
+        using True = std::true_type;
+        using False = std::false_type;
+
+        template <bool cond> using Bool = std::bool_constant<cond>;
+
+        template <typename T>
+        concept ConvertibleToBool = requires 
+        {
+            { T::value } -> std::convertible_to<bool>;
+        };
+
 
         template <typename T> struct Quote{ using type = T; };    ///< Metafunction return type T
         template <typename T> using Return = Quote<T>;            ///< Metafunction return type T
@@ -28,25 +41,30 @@ namespace ugarit {
                       ///< 
                       ///< Intentionally left undefined.
 
+        struct Delim; ///< used as a separator in template argument lists
         
         struct Fail{ template <typename...> using f = Error; }; ///<f HOMF which yields error upon invocation
 
-        template <bool cond> struct If; ///< HOMF to switch between two type parameters
-        template <> struct If<true>   { template <typename T, typename> using f = T;  };   
-        template <> struct If<false>  { template <typename, typename T> using f = T;  };      
-        template <bool cond, typename T, typename F> using Ifc = typename If<cond>::template f<T,F>;
+        template <bool> struct Ifc; ///< HOMF to switch between two type parameters
+        template <> struct Ifc<true>   { template <typename T, typename> using f = T;  };   
+        template <> struct Ifc<false>  { template <typename, typename T> using f = T;  };      
+        template <ConvertibleToBool cond> using If = Ifc<cond::value>;
+        template <bool cond, typename T, typename F> using Alternativec = typename Ifc<cond>::template f<T,F>;
+        template <ConvertibleToBool cond, typename T, typename F> using Alternative = Alternativec<cond::value,T,F>;
 
         struct Head {  template <typename T, typename...> using f = T;  };///< HOMF extract the first of a parameter list of type parameters
 
-        template <N n> struct At; ///< HOMF to extract nth element of a parameter list of type parameters
-        template <N n> struct At
+        template <N n> struct Atc; ///< HOMF to extract nth element of a parameter list of type parameters
+        template <N n> struct Atc
         {
             template <typename, typename... TS> 
-            using f = Ifc<(sizeof...(TS) > 0), At<N{n}-N{1}>, Fail>::template f<TS...>;
+            using f = Alternativec<(sizeof...(TS) > 0), Atc<N{n}-N{1}>, Fail>::template f<TS...>;
         };
 
-        template <> struct At<N{}> : Head{}; 
+        template <> struct Atc<N{}> : Head{}; 
         
+        template <typename V> using At = Atc<V::value>;
+       
 
         struct Listify { template <typename... TS > using f = List<TS...>;  }; ///< HOMF to store type parameters in a list
 
@@ -57,9 +75,9 @@ namespace ugarit {
 
         template <N n, typename C = Listify> struct PopFront ///< HOMF returnning list with first n template parameters dropped
         {
-            template <typename, typename... TS> using f = typename Ifc<(sizeof...(TS) > 0), 
-                                                                       PopFront<n-N{1},C>,
-                                                                       C>::template f<TS...>; 
+            template <typename, typename... TS> using f = typename Alternativec<(sizeof...(TS) > 0), 
+                                                                                PopFront<n-N{1},C>,
+                                                                                C>::template f<TS...>; 
         };
 
         template <typename C> struct PopFront<N{},C> : C{};
@@ -67,13 +85,24 @@ namespace ugarit {
 
         template <typename C = Listify> using PushFront = C;
 
+#if XXX
+        template <Metafunction Less> struct Equivalent
+        {
+            template <typename A, typename B> using type = Less::template<A,B>
+        };
+
+        struct Insert<
+        {
+            Min<Less>::template f<TS...>, 
+        };
+
 
         template <typename Less, typename C = Listify>  struct Unique; ///< \todo
 
         
 
     }
-#if 0
+//____________________________________________
     template<N n, typename C = Listify> 
     struct For{
         template <typename F, typename... TS> using f = For<n-1, C>::template apply<TS...>;
@@ -196,5 +225,6 @@ namespace ugarit {
     };
 
 #endif
+    } // meta
+} // ugarit
 
-}
