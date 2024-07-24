@@ -138,31 +138,42 @@ namespace
     };
 }
 
+TEST_CASE("test meta::PopFrontc")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::PopFrontc<0>::f<>, meta::List<>>));
+    CHECK((std::is_same_v<meta::PopFrontc<0>::f<int>, meta::List<int>>));
+    CHECK((std::is_same_v<meta::PopFrontc<0>::f<int, char>, meta::List<int, char>>));
+
+    CHECK((std::is_same_v<meta::PopFrontc<1>::f<int>, meta::List<>>));
+    CHECK((std::is_same_v<meta::PopFrontc<1>::f<int, char>, meta::List<char>>));
+
+    CHECK((std::is_same_v<meta::PopFrontc<2>::f<int,char>, meta::List<>>));
+    CHECK((std::is_same_v<meta::PopFrontc<2>::f<int, char,bool>, meta::List<bool>>));
+
+
+    CHECK((std::is_same_v<meta::PopFrontc<0,Wrap>::f<>, WrapList<>>));
+    CHECK((std::is_same_v<meta::PopFrontc<0,Wrap>::f<int>, WrapList<int>>));
+    CHECK((std::is_same_v<meta::PopFrontc<0,Wrap>::f<int, char>, WrapList<int, char>>));
+
+    CHECK((std::is_same_v<meta::PopFrontc<1,Wrap>::f<int>, WrapList<>>));
+    CHECK((std::is_same_v<meta::PopFrontc<1,Wrap>::f<int, char>, WrapList<char>>));
+
+    CHECK((std::is_same_v<meta::PopFrontc<2,Wrap>::f<int,char>, WrapList<>>));
+    CHECK((std::is_same_v<meta::PopFrontc<2,Wrap>::f<int, char,bool>, WrapList<bool>>));
+}
+
 TEST_CASE("test meta::PopFront")
 {
     namespace meta = ugarit::meta;
 
-    CHECK((std::is_same_v<meta::PopFront<0>::f<>, meta::List<>>));
-    CHECK((std::is_same_v<meta::PopFront<0>::f<int>, meta::List<int>>));
-    CHECK((std::is_same_v<meta::PopFront<0>::f<int, char>, meta::List<int, char>>));
-
-    CHECK((std::is_same_v<meta::PopFront<1>::f<int>, meta::List<>>));
-    CHECK((std::is_same_v<meta::PopFront<1>::f<int, char>, meta::List<char>>));
-
-    CHECK((std::is_same_v<meta::PopFront<2>::f<int,char>, meta::List<>>));
-    CHECK((std::is_same_v<meta::PopFront<2>::f<int, char,bool>, meta::List<bool>>));
-
-
-    CHECK((std::is_same_v<meta::PopFront<0,Wrap>::f<>, WrapList<>>));
-    CHECK((std::is_same_v<meta::PopFront<0,Wrap>::f<int>, WrapList<int>>));
-    CHECK((std::is_same_v<meta::PopFront<0,Wrap>::f<int, char>, WrapList<int, char>>));
-
-    CHECK((std::is_same_v<meta::PopFront<1,Wrap>::f<int>, WrapList<>>));
-    CHECK((std::is_same_v<meta::PopFront<1,Wrap>::f<int, char>, WrapList<char>>));
-
-    CHECK((std::is_same_v<meta::PopFront<2,Wrap>::f<int,char>, WrapList<>>));
-    CHECK((std::is_same_v<meta::PopFront<2,Wrap>::f<int, char,bool>, WrapList<bool>>));
+    CHECK((std::is_same_v<meta::PopFront<LC<0>>::f<>, meta::List<>>));
+    CHECK((std::is_same_v<meta::PopFront<UC<0>>::f<int>, meta::List<int>>));
+    CHECK((std::is_same_v<meta::PopFront<LC<1>>::f<int, char>, meta::List<char>>));
+    CHECK((std::is_same_v<meta::PopFront<UC<2>>::f<int,char>, meta::List<>>));
 }
+
 
 TEST_CASE("test meta::PushFront")
 {

@@ -32,6 +32,11 @@ namespace ugarit {
             { T::value } -> std::convertible_to<bool>;
         };
 
+        template <typename T>
+        concept UnsignedIntegral = requires 
+        {
+            { T::value } -> std::convertible_to<std::uintmax_t>;
+        };
 
         template <typename T> struct Quote{ using type = T; };    ///< Metafunction return type T
         template <typename T> using Return = Quote<T>;            ///< Metafunction return type T
@@ -63,7 +68,7 @@ namespace ugarit {
 
         template <> struct Atc<N{}> : Head{}; 
         
-        template <typename V> using At = Atc<V::value>;
+        template <UnsignedIntegral V> using At = Atc<V::value>;
        
 
         struct Listify { template <typename... TS > using f = List<TS...>;  }; ///< HOMF to store type parameters in a list
@@ -73,17 +78,45 @@ namespace ugarit {
             template <typename... TS > using f = typename C::template f<TS...>;
         };
 
-        template <N n, typename C = Listify> struct PopFront ///< HOMF returnning list with first n template parameters dropped
+        template <N n, typename C = Listify> struct PopFrontc ///< HOMF returnning list with first n template parameters dropped
         {
             template <typename, typename... TS> using f = typename Alternativec<(sizeof...(TS) > 0), 
-                                                                                PopFront<n-N{1},C>,
+                                                                                PopFrontc<n-N{1},C>,
                                                                                 C>::template f<TS...>; 
         };
+        template <typename C> struct PopFrontc<N{},C> : C{};
 
-        template <typename C> struct PopFront<N{},C> : C{};
+
+        template <UnsignedIntegral V, typename C = Listify> using PopFront = PopFrontc<V::value, C>;
 
 
         template <typename C = Listify> using PushFront = C;
+
+        namespace details
+        {
+            struct RotateStop
+            {
+                template <N, typename C, typename... TS> using f = C;
+            };
+
+            /// precondition list to rotate has more than one element
+            struct RotateOne
+            {
+                template <N n, typename C, typename T, typename... TS> using f = 
+                    typename Alternativec<  (n > 0),
+                                            RotateOne,
+                                            RotateStop
+                                         >::template f<(n - N{1}), C, TS..., T>;
+            };
+        } // namespace details
+
+        template <N n, typename C = Listify> struct Rotatec
+        {
+            template <typename... TS> using f = typename Alternativec<(sizeof...(TS) < 2),
+                                                                       details::RotateStop,
+                                                                       details::RotateOne
+                                                                       >::template f<n, C, TS...>; 
+        };
 
 #if XXX
         template <Metafunction Less> struct Equivalent
