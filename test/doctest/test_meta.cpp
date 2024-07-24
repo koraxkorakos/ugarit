@@ -21,6 +21,21 @@ TEST_CASE("ugarit_meta, MetaFunction")
     CHECK(true == meta::MetaFunction<T2>);    
 }
 
+TEST_CASE("test meta::Quote")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::Quote<int>::type, int>));    
+}
+
+TEST_CASE("test meta::Return")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::Return<int>::type, meta::Return<int>::type>));    
+}
+
+
 TEST_CASE("test meta::If")
 {
     namespace meta = ugarit::meta;
@@ -110,6 +125,14 @@ TEST_CASE("test meta::PopFront")
 
     CHECK((std::is_same_v<meta::PopFront<2,Wrap>::f<int,char>, WrapList<>>));
     CHECK((std::is_same_v<meta::PopFront<2,Wrap>::f<int, char,bool>, WrapList<bool>>));
-
 }
+
+TEST_CASE("test meta::PushFront")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::PushFront<>, meta::Listify>));
+    CHECK((std::is_same_v<meta::PushFront<Wrap>, WrapList<>>));
+}
+
 

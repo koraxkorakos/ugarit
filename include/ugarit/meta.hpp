@@ -20,12 +20,14 @@ namespace ugarit {
             typename T::type;
         };
 
+        template <typename T> struct Quote{ using type = T; };    ///< Metafunction return type T
+        template <typename T> using Return = Quote<T>;            ///< Metafunction return type T
         template <typename...> struct List{ using type = List; }; ///< Metafunction List constructor
 
         struct Error; ///< meta programming result in case of error, e.g. pop_front on an empty list
                       ///< 
                       ///< Intentionally left undefined.
-        
+
         
         struct Fail{ template <typename...> using f = Error; }; ///<f HOMF which yields error upon invocation
 
@@ -63,7 +65,12 @@ namespace ugarit {
         template <typename C> struct PopFront<N{},C> : C{};
 
 
+        template <typename C = Listify> using PushFront = C;
+
+
         template <typename Less, typename C = Listify>  struct Unique; ///< \todo
+
+        
 
     }
 #if 0
