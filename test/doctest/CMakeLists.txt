@@ -8,7 +8,7 @@ target_sources(ugarit_doctests
                PRIVATE  
                main.cpp
                test_meta.cpp)
-target_link_libraries(ugarit_doctests ugarit doctest::doctest)
+target_link_libraries(ugarit_doctests ugarit doctest::doctest ugarit_testutils)
 doctest_discover_tests(ugarit_doctests)
 
 

@@ -14,7 +14,8 @@ namespace ugarit {
 
     namespace meta {
 
-        using N = std::uintmax_t;        
+        using Nat = unsigned;        
+        using Int = signed;        
 
         template <typename T>
         concept MetaFunction = requires {
@@ -25,6 +26,7 @@ namespace ugarit {
         using False = std::false_type;
 
         template <bool cond> using Bool = std::bool_constant<cond>;
+        template <int n> using IntT = std::integral_constant<int,n>;
 
         template <typename T>
         concept ConvertibleToBool = requires 
@@ -35,8 +37,16 @@ namespace ugarit {
         template <typename T>
         concept UnsignedIntegral = requires 
         {
-            { T::value } -> std::convertible_to<std::uintmax_t>;
+            { T::value } -> std::convertible_to<Nat>;
+            { std::bool_constant<(T::value >= 0)>{} } -> std::same_as<std::true_type>;
         };
+
+        template <typename T>
+        concept SignedIntegral = requires 
+        {
+            { T::value } -> std::convertible_to<Int>;
+        };
+
 
         template <typename T> struct Quote{ using type = T; };    ///< Metafunction return type T
         template <typename T> using Return = Quote<T>;            ///< Metafunction return type T
@@ -59,14 +69,14 @@ namespace ugarit {
 
         struct Head {  template <typename T, typename...> using f = T;  };///< HOMF extract the first of a parameter list of type parameters
 
-        template <N n> struct Atc; ///< HOMF to extract nth element of a parameter list of type parameters
-        template <N n> struct Atc
+        template <Nat n> struct Atc; ///< HOMF to extract nth element of a parameter list of type parameters
+        template <Nat n> struct Atc
         {
             template <typename, typename... TS> 
-            using f = Alternativec<(sizeof...(TS) > 0), Atc<N{n}-N{1}>, Fail>::template f<TS...>;
+            using f = Alternativec<(sizeof...(TS) > 0), Atc<Nat{n}-Nat{1}>, Fail>::template f<TS...>;
         };
 
-        template <> struct Atc<N{}> : Head{}; 
+        template <> struct Atc<Nat{}> : Head{}; 
         
         template <UnsignedIntegral V> using At = Atc<V::value>;
        
@@ -78,13 +88,13 @@ namespace ugarit {
             template <typename... TS > using f = typename C::template f<TS...>;
         };
 
-        template <N n, typename C = Listify> struct PopFrontc ///< HOMF returnning list with first n template parameters dropped
+        template <Nat n, typename C = Listify> struct PopFrontc ///< HOMF returnning list with first n template parameters dropped
         {
             template <typename, typename... TS> using f = typename Alternativec<(sizeof...(TS) > 0), 
-                                                                                PopFrontc<n-N{1},C>,
+                                                                                PopFrontc<n-Nat{1},C>,
                                                                                 C>::template f<TS...>; 
         };
-        template <typename C> struct PopFrontc<N{},C> : C{};
+        template <typename C> struct PopFrontc<Nat{},C> : C{};
 
 
         template <UnsignedIntegral V, typename C = Listify> using PopFront = PopFrontc<V::value, C>;
@@ -96,27 +106,39 @@ namespace ugarit {
         {
             struct RotateStop
             {
-                template <N, typename C, typename... TS> using f = C;
+                template <Nat, typename C, typename... TS> using f = typename C::template f<TS...>;
             };
 
             /// precondition list to rotate has more than one element
             struct RotateOne
             {
-                template <N n, typename C, typename T, typename... TS> using f = 
-                    typename Alternativec<  (n > 0),
-                                            RotateOne,
-                                            RotateStop
-                                         >::template f<(n - N{1}), C, TS..., T>;
+                template <Nat n, typename C, typename T, typename... TS> using f = 
+                    typename Alternativec<  (n && sizeof...(TS)),
+                                            RotateStop,
+                                            RotateOne                                            
+                                         >::template f<(n - Nat{1}), C, TS..., T>;
             };
+
+            constexpr std::size_t compute_rotation(std::size_t sz, unsigned n) // negative n gets wrapped by conversion
+            {
+                return sz > 1U  ? n % sz  : 0U; 
+            }
         } // namespace details
 
-        template <N n, typename C = Listify> struct Rotatec
+
+        template <Int n, typename C = Listify> struct Rotatec
         {
-            template <typename... TS> using f = typename Alternativec<(sizeof...(TS) < 2),
-                                                                       details::RotateStop,
-                                                                       details::RotateOne
-                                                                       >::template f<n, C, TS...>; 
+            template <typename... TS> using f = typename Alternativec<details::compute_rotation(sizeof...(TS), n), 
+                                                                      details::RotateOne,
+                                                                      details::RotateStop                                                                    
+                                                                    >::template f<
+                                                                        details::compute_rotation(sizeof...(TS), n),
+                                                                        C, 
+                                                                        TS...>; 
         };
+
+
+        template <SignedIntegral V, typename C = Listify> using Rotate = Rotatec<V::value, C>;
 
 #if XXX
         template <Metafunction Less> struct Equivalent
@@ -136,20 +158,20 @@ namespace ugarit {
 
     }
 //____________________________________________
-    template<N n, typename C = Listify> 
+    template<Nat n, typename C = Listify> 
     struct For{
         template <typename F, typename... TS> using f = For<n-1, C>::template apply<TS...>;
     }
 
 
-    template <N n, typename C = Listify>
+    template <Nat n, typename C = Listify>
     struct Rotate
     {
         template <typename T, typename... TS> using f = Rotate<n-1, C>::template f<TS..., T>;
     };
 
     template <typename C>
-    struct Rotate<N{}, C>
+    struct Rotate<Nat{}, C>
     {
         template <typename... TS> using f = C::template f<TS...>;
     };
@@ -180,28 +202,28 @@ namespace ugarit {
 
 
   /*
-    template <N... ns>  
+    template <Nat... ns>  
     struct bits;
 
-    template <N... ns> requires { is_strictly_sorted(ns...) }
+    template <Nat... ns> requires { is_strictly_sorted(ns...) }
     struct bits<ns...>{};
 
-    template <N... ns> requires { !is_strictly_sorted(ns...) }
+    template <Nat... ns> requires { !is_strictly_sorted(ns...) }
     struct bits<ns...>;*/
 
-    template <N n>  
+    template <Nat n>  
     struct bits_;
 
-    template <N n> requires 
+    template <Nat n> requires 
     { 
         std::is_same_t<
-            std::integral_constant<N, n>,
-            std::integral_constant<N, (n / 2) * 2>
+            std::integral_constant<Nat, n>,
+            std::integral_constant<Nat, (n / 2) * 2>
         > 
     }
     struct bits_<ns...>{};
 
-    template <N n> requires { n % 2 = 1 }
+    template <Nat n> requires { n % 2 = 1 }
     struct bits_<ns...>;
 
     template <typename T, typename... TS>

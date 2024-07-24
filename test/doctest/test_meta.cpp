@@ -1,10 +1,15 @@
 #include <doctest/doctest.h>
 //ugarit:meta;
+#include <iostream>
 #include <type_traits>
 
 #include <ugarit/meta.hpp>
 // check header guard
 #include <ugarit/meta.hpp>
+#include <testutils/demangle.hpp>
+
+using testing::demangle;
+using testing::demangle_t;
 
 TEST_CASE("ugarit_meta, MetaFunction")
 {
@@ -99,10 +104,10 @@ TEST_CASE("test meta::Atc")
 {
     namespace meta = ugarit::meta;
 
-    CHECK((std::is_same_v<meta::At<UC<0>>::f<int>, int>));
-    CHECK((std::is_same_v<meta::At<LC<0>>::f<int>, int>));
-    CHECK((std::is_same_v<meta::At<UC<1>>::f<int, long>, long>));
-    CHECK((std::is_same_v<meta::At<LC<2>>::f<int, long, bool>, bool>));
+    CHECK((std::is_same_v<meta::At<UC<0U>>::f<int>, int>));
+    CHECK((std::is_same_v<meta::At<LC<0U>>::f<int>, int>));
+    CHECK((std::is_same_v<meta::At<UC<1U>>::f<int, long>, long>));
+    CHECK((std::is_same_v<meta::At<LC<2U>>::f<int, long, bool>, bool>));
 }
 
 
@@ -130,7 +135,7 @@ TEST_CASE("test meta::Listify")
 
 namespace 
 {
-    template <typename... TS> struct WrapList;
+    template <typename... TS> struct WrapList{};
 
     struct Wrap
     {
@@ -183,4 +188,32 @@ TEST_CASE("test meta::PushFront")
     CHECK((std::is_same_v<meta::PushFront<Wrap>, Wrap>));
 }
 
+TEST_CASE("test meta::Rotate")
+{
+    namespace meta = ugarit::meta;
+
+    CHECK((std::is_same_v<meta::Rotatec<0>::f<>, meta::List<>>));
+    CHECK((std::is_same_v<meta::Rotatec<0>::f<int>, meta::List<int>>));
+    CHECK((std::is_same_v<meta::Rotatec<0>::f<long,int>, meta::List<long,int>>));
+
+    CHECK((std::is_same_v<meta::Rotatec<1>::f<>, meta::List<>>));
+    CHECK((std::is_same_v<meta::Rotatec<1>::f<int>, meta::List<int>>));
+    CHECK((std::is_same_v<meta::Rotatec<1>::f<int,long>, meta::List<long,int>>));
+    CHECK((std::is_same_v<meta::Rotatec<1>::f<int,long,char>, meta::List<long,char,int>>));
+
+    CHECK((std::is_same_v<meta::Rotatec<2>::f<>, meta::List<>>));
+    CHECK((std::is_same_v<meta::Rotatec<2>::f<int>, meta::List<int>>));
+
+    CHECK((std::is_same_v<meta::Rotatec<2>::f<int,long>, meta::List<int,long>>));
+    CHECK_MESSAGE((std::is_same_v<meta::Rotatec<2>::f<int,long,char>, meta::List<char,int,long>>), (demangle_t<meta::Rotatec<2>::f<int,long,char>>())); 
+    CHECK_MESSAGE((std::is_same_v<meta::Rotatec<-1>::f<int,long,char>, meta::List<char,int,long>>), (demangle_t<meta::Rotatec<-1>::f<int,long,char>>()));
+
+    CHECK((std::is_same_v<meta::Rotatec<0,Wrap>::f<>, WrapList<>>));
+    CHECK((std::is_same_v<meta::Rotatec<1,Wrap>::f<int>, WrapList<int>>));
+    CHECK_MESSAGE((std::is_same_v<meta::Rotatec<2,Wrap>::f<long,int>, WrapList<int,long>>),(demangle_t<meta::Rotatec<2,Wrap>::f<long,int>>())); 
+
+    using X = meta::Rotatec<2>::f<int,long,char>;
+
+    std::cout << "---\n" << testing::demangle_t<X>() << std::endl; 
+}
 
