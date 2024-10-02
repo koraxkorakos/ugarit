@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <utility>
 
+
 namespace ugarit {
 namespace meta {
 
@@ -65,7 +66,28 @@ template <N... ns> struct Unique<NSequence<ns...>> {
     return span<unsigned const>(cbegin(arr), unique(begin(arr), end(arr)));
   }();
 
-  template <int... Indices> using type = NSequence<data[Indices]...>;
+template <int... Indices> using type = NSequence<data[Indices]...>;
 };
+
 }  // namespace meta
+#if 0
+namespace homf
+{
+
+template <typename T>struct Intersection;
+
+  template <typename C = Listify>
+  struct Unique {
+    template <N... ns> using apply = C::template apply<meta::NSequence<ns...>::data[Indices]...>;
+  };
+
+  template <typename C = Listify>
+  struct Union {
+    template <typename... Ts> using apply = typename Union::template apply_<TS...>::type;
+    template <typename... Ts> struct apply_ : typename C::template appy<>::type;
+    template <N... ns, typename... Ts> struct apply_<meta::NSequence<ns...>, Ts...> 
+      = C::template apply<meta::NSequence<ns...>::data[Indices]...>;
+  };
+
+#endif
 }  // namespace ugarit
