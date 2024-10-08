@@ -34,3 +34,12 @@
 build/**
 .vscode/**
 .cache
+doc/doc.synctex.gz
+doc/doc.pdf
+doc/doc.run.xml
+doc/doc.blg
+doc/doc.aux
+doc/doc.bbl
+doc/doc.bcf
+doc/doc.log
+doc/doc.idx

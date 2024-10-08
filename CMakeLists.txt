@@ -69,7 +69,7 @@ add_library(ugarit STATIC)
 target_sources(ugarit
                PUBLIC 
                FILE_SET ugarit_modules TYPE CXX_MODULES               
-               FILES src/meta.ixx src/ugarit.ixx src/core.ixx)
+               FILES src/ugarit.ixx src/core.ixx src/sparse.ixx)
            
 target_compile_options(ugarit
                PUBLIC
