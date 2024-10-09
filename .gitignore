@@ -43,3 +43,4 @@ doc/doc.bbl
 doc/doc.bcf
 doc/doc.log
 doc/doc.idx
+test/doctest/CMakeFiles/cmake.check_cache
