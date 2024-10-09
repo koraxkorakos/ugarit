@@ -64,6 +64,15 @@ endif()
 
 # -----------------------------------------------------------------------------
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+add_library(std_used INTERFACE)
+target_include_directories(std_used SYSTEM INTERFACE) 
+target_compile_options(std_used
+               INTERFACE
+               $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts -x c++-system-header -c bits/stdc++.h>
+)
+
+target_sources(std_used PUBLIC src/dummy.cpp)
+
 
 add_library(ugarit STATIC)
 target_sources(ugarit
@@ -77,12 +86,9 @@ target_compile_options(ugarit
 )
 
 target_include_directories(ugarit
+                           SYSTEM
                            PUBLIC
                            include
-)
-
-target_link_libraries(ugarit
-                      PRIVATE
 )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

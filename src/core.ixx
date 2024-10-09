@@ -14,8 +14,10 @@ namespace ugarit {
 
     export using Bases = ::std::uintmax_t;    
 
+    export template <typename T> concept integral_type = std::is_integral_v<T>;
+
     ///\brief meta function constructing integer sets from a variadic list of integers parameters
-    template <typename T, T... ns> requires std::is_arithmetic_v<T>
+    template <integral_type T, T... ns> requires std::is_arithmetic_v<T>
     struct make_integer_set {
         static constexpr auto pair = [](){
             std::array<T, sizeof...(ns)> arr{ ns... };
@@ -29,33 +31,47 @@ namespace ugarit {
         };
         using type = typename helper<std::make_index_sequence<pair.second>>::type;
     };
-
     
-    export template <typename T, T... ns> using integer_set 
+    export template <integral_type T, T... ns> using integer_set 
         = typename make_integer_set<T, ns...>::type; ///< setup integer set holding sorted unique numbers passed
 
     export template <std::size_t ... ns> using index_set 
         = integer_set<std::size_t, ns...>; ///< setup integer set holding sorted unique numbers passed
 
-    export template <typename T, T... ns> using integer_seq 
+    export template <integral_type T, T... ns> using integer_seq 
         = std::integer_sequence<T, ns...>; ///< short alias for std integer sequence
     
     export template <std::size_t... ns> using index_seq 
         = std::index_sequence<ns...>; ///< short alias for std index sequence
 
-    ///\return -1 if `value` is not containes within sequence, otherwise
-    /// it return its position
-    template <typename T, typename T::value_type> constexpr int pos;
-    template <typename T, typename T::value_type value, typename T::value_type... ns> 
-        constexpr int pos<std::integer_sequence<T,ns...>,value> =  
-        [](std::initializer_list<typename T::value_type> s, typename T::value_type  v)
-        {
-            auto const pos = std::ranges::find(s) - s.begin();
-            return  pos > s.size() ? -1 : pos;
-        }({ns...}, value);
- 
-    template <typename T, typename T::value_type v> constexpr bool contains = pos<T,v> >= 0;
+    ///\brief query whether value is contained in sequence `{ns...}`
+    ///\tparam T an integer type allowed for std::integer_sequence
+    template <integral_type T, T... ns>
+    consteval auto containes(std::integer_sequence<T,ns...>,T value)  { 
+        return std::ranges::contains({ns...}, value); 
+    };
 
+    ///\brief query entry at index
+    ///\return position of first occurance of `value` within `{ns...}`
+    ///\retval -1 if `value` is not contained within sequence, otherwise   
+    template <integral_type T, T... ns>
+    consteval auto at(std::integer_sequence<T,ns...>,std::size_t pos) -> std::size_t { 
+        static_assert(pos < sizeof...(ns));
+        return {ns...}[pos];
+    };  
+
+    ///\brief query index of entry, whose value ie `value`
+    ///\return position of first occurance of `value` within `{ns...}`
+    ///\retval -1 if `value` is not contained within sequence, otherwise   
+    template <integral_type T, T... ns>
+    consteval auto pos(std::integer_sequence<T,ns...>,T value) -> std::ptrdiff_t { 
+        auto const seq = {ns...};
+        auto const pos = std::ranges::find(seq, value) - begin(seq); 
+        return pos ==  sizeof...(ns) ? -1 : pos;
+    };
+
+
+///\todo vectorized at, pos, contains (=intrsection)
 
 /*
     template <typename T, T... ns> 
