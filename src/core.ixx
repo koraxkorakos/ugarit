@@ -26,8 +26,8 @@ namespace ugarit {
     export template <typename T> concept integral_type = std::is_integral_v<T>;
 
     ///\brief meta function constructing integer sets from a variadic list of integers parameters
-    export template <integral_type T, T... ns> requires std::is_arithmetic_v<T>
-    struct make_integer_set {
+    template <integral_type T, T... ns> requires std::is_arithmetic_v<T>
+    struct integer_set_ {
         static constexpr auto pair = [](){
             std::array<T, sizeof...(ns)> arr{ ns... };
             std::sort(arr.begin(), arr.end());
@@ -42,7 +42,7 @@ namespace ugarit {
     };
     
     export template <integral_type T, T... ns> using integer_set 
-        = typename make_integer_set<T, ns...>::type; ///< setup integer set holding sorted unique numbers passed
+        = typename integer_set_<T, ns...>::type; ///< setup integer set holding sorted unique numbers passed
 
     export template <std::size_t ... ns> using index_set 
         = integer_set<std::size_t, ns...>; ///< setup integer set holding sorted unique numbers passed
@@ -53,56 +53,57 @@ namespace ugarit {
     export template <std::size_t... ns> using index_seq 
         = std::index_sequence<ns...>; ///< short alias for std index sequence
 
-    ///\brief query whether value is contained in sequence `{ns...}`
-    ///\tparam T an integer type allowed for std::integer_sequence
-    template <integral_type T, T... ns>
-    consteval auto containes_(std::integer_sequence<T,ns...>,T value)  { 
-        return std::ranges::contains({ns...}, value); 
-    };
+    export template <typename T> struct make_unique_sorted_;
+    export template <typename T, T... ns> struct make_unique_sorted_<std::integer_sequence<T, ns...>> 
+    {
+        using type = integer_seq<T, ns...>;
+    }; 
 
-    ///\brief query entry at index
-    ///\return position of first occurance of `value` within `{ns...}`
-    ///\retval -1 if `value` is not contained within sequence, otherwise   
-    template <integral_type T, T... ns>
-    consteval auto at_(std::integer_sequence<T,ns...>,std::size_t pos) -> std::size_t { 
-        static_assert(pos < sizeof...(ns));
-        auto const ini_list = {ns...};
-        return ini_list[pos];
-    };  
+    ///\brief create a set from a sequence by sorting and removing duplicates
+    template <typename T> using to_set = typename make_unique_sorted_<T>::type;
 
-    ///\brief query index of entry, whose value ie `value`
-    ///\return position of first occurance of `value` within `{ns...}`
-    ///\retval -1 if `value` is not contained within sequence, otherwise   
-    template <integral_type T, T... ns>
-    consteval auto pos_(std::integer_sequence<T,ns...>,T value) -> std::ptrdiff_t { 
-        auto const seq = {ns...};
-        auto const pos = std::ranges::find(seq, value) - begin(seq); 
-        return pos ==  sizeof...(ns) ? -1 : pos;
-    };
+    /// intentionally left undefined (unly specializations are defined)
+    export template <typename T, std::size_t> typename T::value_type at;
+    ///\brief retrive integer in integersequence by position
+    ///\return integer value ins sequenceat a given position
+    ///\pre position must be a valid position, i.e. it must not index outside of the integer sequernce
+    export template <typename T, T... ns, std::size_t n> constexpr typename T::value_type at<std::integer_sequence<T, ns...>, n>
+       = []() -> T{
+        std::initializer_list<T> const lst = {ns...};
+        static_assert(n < sizeof...(ns));
+        return *(lst.begin() + n);
+    }();
 
-    template <typename T>
-    consteval std::ptrdiff_t get_pos(std::size_t n, std::initializer_list<T> lst) {
-        auto const pos = std::ranges::find(lst, n) - lst.begin();
+    /// intentionally left undefined (unly specializations are defined)
+    export template <typename T, typename T::value_type v> std::size_t pos;
+    ///\brief locate integer in integersequence
+    ///\return position of the first occurance of `v` in integer sequence `T` 
+    ///\retval -1 if element is not found
+    export template <typename T, T ...ns, T v> constexpr std::size_t pos<std::integer_sequence<T, ns...>, v> 
+        = []() -> std::ptrdiff_t {
+        std::initializer_list<T> const lst = {ns...};
+        auto const pos = std::ranges::find(lst, v) - lst.begin();
         return pos == lst.size() ? -1 : pos;
-    };
+    }();
 
-    template <typename T>
-    consteval std::ptrdiff_t get_at(std::size_t n, std::initializer_list<T> lst) {
-        return *(lst.begin()+n);
-    };    
+    /// intentionally left undefined (unly specializations are defined)
+    export template <typename T, typename T::value_type v> bool contains;    
+    ///\brief test set or sequnce inclusion given an inter sequencence and an integer vale
+    ///\retval true if element v is found within the integer sequence
+    ///\retval false otherwise
+    export template <typename T, T ...ns, T v> constexpr bool contains<std::integer_sequence<T, ns...>, v> 
+        = std::ranges::contains({ns...}, v);
 
-    export template <typename T, typename T::value_type v> constexpr std::ptrdiff_t pos = -1; 
-    export template <typename T, typename T::value_type v, T... ns> 
-        constexpr std::ptrdiff_t pos<std::integer_sequence<T, ns...>, v> = get_pos<T>(v, ns...); 
+    template <typename U, typename V> struct concat_;
+    template <typename T, T... ns1, T... ns2> struct concat_<std::integer_sequence<T, ns1...>, std::integer_sequence<T, ns2...>> :
+       std::integer_sequence<T,ns1..., ns2...>{};
 
-    export template <typename T, typename T::value_type v> constexpr bool containes = pos<T,v> >= 0; 
+    export template <typename U, typename V> using concat = typename concat_<U,V>::type;
+    export template <typename U, typename V> using setunion = to_set<concat<U,V>>;
 
-    export template <typename T, std::size_t n> constexpr nullptr_t at; // spoil general
-    export template <typename T, std::size_t n, T...ns> constexpr 
-        auto at<std::integer_sequence<T,ns...>, n> = get_at(n, {ns...});
+    
 
-
-///\todo vectorized at, pos, contains (=intrsection)
+///\todo vectorized at, pos, contains (=intersection)
 
 /*
     template <typename T, T... ns> 
