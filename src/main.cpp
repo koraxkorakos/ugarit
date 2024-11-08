@@ -1,7 +1,7 @@
 //#include <iostream>
 
 #include "/usr/local/gcc-14.2.0/include/c++/14.2.0/x86_64-linux-gnu/bits/stdc++.h"
-import ugarit;
+#include <ugarit/ugarit.h>
 
 
 int main(int, char**)
