@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ugarit
 Universal Geoetric Algebra library for C++.
 
@@ -20,4 +19,3 @@ Ugarit as an acronym stands for "Universal Geometric Algebra Rewritten in Templa
 
 ## Requirements
 Needs a C++ 20 compliant compiler.
->>>>>>> 0d77e38 (add name in cuneiform)
