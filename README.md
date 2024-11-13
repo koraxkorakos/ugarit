@@ -11,7 +11,6 @@ C++23 import of std module is not yet supported. because cmake support for that 
 
 Note: C++ Module support has recently beed droped because G++ 14.2 would be needed and that compilers support of modules is currently lacking and too buggy (ICEs).
 
-=======
 # ugarit 𐎁𐎘𐎐𐎚𐎋 
 
 Universal Geometric Algebra library for C++.
