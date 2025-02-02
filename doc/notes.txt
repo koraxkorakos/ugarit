@@ -1,0 +1,7 @@
+Notes.txt
+=========
+
+Code for integert set union, set intersection, (ad maybe set difference and set symmetric difference) should work with any number of set.
+
+The empty set union is the is th empty set, but the empty set intersection would be the set of all integers. The later is too large to be stored, so we should put out a compile error instead.
+The alternative would be a special class that thest for inclusion of every integer, but that would likely not have any practical use.
